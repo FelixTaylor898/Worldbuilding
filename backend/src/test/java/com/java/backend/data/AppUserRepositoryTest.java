@@ -50,8 +50,49 @@ public class AppUserRepositoryTest {
     }
 
     @Test
+    public void findByUserIdInvalidTest() {
+        Optional<AppUser> op = appUserRepository.findById(5L);
+        assertTrue(op.isEmpty());
+    }
+
+    @Test
     public void findByRoleTest() {
         List<AppUser> users = appUserRepository.findByRole(Role.admin);
         assertEquals(1, users.size());
+    }
+
+
+    @Test
+    public void findByUserEmailTest() {
+        Optional<AppUser> op = appUserRepository.findByEmail("john.doe@example.com");
+        assertTrue(op.isPresent());
+        AppUser user = op.get();
+        //     (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
+        assertEquals("john_doe", user.getUsername());
+        assertEquals("john.doe@example.com", user.getEmail());
+        assertEquals(Role.admin, user.getRole());
+    }
+
+    @Test
+    public void findByUserEmailInvalidTest() {
+        Optional<AppUser> op = appUserRepository.findByEmail("blah@blah.com");
+        assertTrue(op.isEmpty());
+    }
+
+    @Test
+    public void findByUsernameTest() {
+        Optional<AppUser> op = appUserRepository.findByUsername("john_doe");
+        assertTrue(op.isPresent());
+        AppUser user = op.get();
+        //     (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
+        assertEquals("john_doe", user.getUsername());
+        assertEquals("john.doe@example.com", user.getEmail());
+        assertEquals(Role.admin, user.getRole());
+    }
+
+    @Test
+    public void findByUsernameInvalidTest() {
+        Optional<AppUser> op = appUserRepository.findByEmail("john_doe");
+        assertTrue(op.isEmpty());
     }
 }
