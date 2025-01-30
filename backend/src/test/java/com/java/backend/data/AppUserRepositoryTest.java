@@ -1,6 +1,7 @@
 package com.java.backend.data;
 
 import com.java.backend.model.AppUser;
+import com.java.backend.model.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,8 +11,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = "spring.config.location=classpath:application-test.properties")
@@ -33,5 +36,22 @@ public class AppUserRepositoryTest {
     public void findAllUsersTest() {
         List<AppUser> list = appUserRepository.findAll();
         assertEquals(2, list.size());
+    }
+
+    @Test
+    public void findByUserIdTest() {
+        Optional<AppUser> op = appUserRepository.findById(1L);
+        assertTrue(op.isPresent());
+        AppUser user = op.get();
+        //     (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
+        assertEquals("john_doe", user.getUsername());
+        assertEquals("john.doe@example.com", user.getEmail());
+        assertEquals(Role.admin, user.getRole());
+    }
+
+    @Test
+    public void findByRoleTest() {
+        List<AppUser> users = appUserRepository.findByRole(Role.admin);
+        assertEquals(1, users.size());
     }
 }
