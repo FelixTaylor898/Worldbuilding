@@ -46,7 +46,7 @@ public class AppUserRepositoryTest {
         //     (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
         assertEquals("john_doe", user.getUsername());
         assertEquals("john.doe@example.com", user.getEmail());
-        assertEquals(Role.admin, user.getRole());
+        assertEquals(Role.ADMIN, user.getRole());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class AppUserRepositoryTest {
 
     @Test
     public void findByRoleTest() {
-        List<AppUser> users = appUserRepository.findByRole(Role.admin);
+        List<AppUser> users = appUserRepository.findByRole(Role.ADMIN);
         assertEquals(1, users.size());
     }
 
@@ -70,7 +70,7 @@ public class AppUserRepositoryTest {
         //     (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
         assertEquals("john_doe", user.getUsername());
         assertEquals("john.doe@example.com", user.getEmail());
-        assertEquals(Role.admin, user.getRole());
+        assertEquals(Role.ADMIN, user.getRole());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class AppUserRepositoryTest {
         //     (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
         assertEquals("john_doe", user.getUsername());
         assertEquals("john.doe@example.com", user.getEmail());
-        assertEquals(Role.admin, user.getRole());
+        assertEquals(Role.ADMIN, user.getRole());
     }
 
     @Test

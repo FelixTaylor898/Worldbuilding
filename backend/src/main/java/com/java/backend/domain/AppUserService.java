@@ -2,47 +2,58 @@ package com.java.backend.domain;
 
 import com.java.backend.data.AppUserRepository;
 import com.java.backend.model.AppUser;
+import com.java.backend.model.AppUserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AppUserService {
 
-    @Autowired
     private final AppUserRepository repository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AppUserService(AppUserRepository repository) {
+    public AppUserService(AppUserRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
-    }
-
-    public AppUser addUser(AppUser user) {
-        return repository.save(user);
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void deleteUser(Long userId) {
         repository.deleteById(userId);
     }
 
-    public List<AppUser> findAll() {
-        return repository.findAll();
+    public List<AppUserDTO> findAll() {
+        return repository.findAll().stream()
+                .map(AppUserDTO::new) // Convert each AppUser to AppUserDTO
+                .collect(Collectors.toList());
     }
 
-    public AppUser findById(Long id) {
+    public AppUserDTO findById(Long id) {
         Optional<AppUser> op = repository.findById(id);
-        return op.orElse(null);
+        return op.map(AppUserDTO::new).orElse(null); // Return AppUserDTO if found
     }
 
-    public AppUser findByUsername(String username) {
+    public AppUserDTO findByUsername(String username) {
         Optional<AppUser> op = repository.findByUsername(username);
-        return op.orElse(null);
+        return op.map(AppUserDTO::new).orElse(null); // Return AppUserDTO if found
     }
 
-    public AppUser findByEmail(String email) {
+    public AppUserDTO findByEmail(String email) {
         Optional<AppUser> op = repository.findByEmail(email);
-        return op.orElse(null);
+        return op.map(AppUserDTO::new).orElse(null); // Return AppUserDTO if found
+    }
+
+    public AppUserDTO registerUser(AppUser user) {
+        // Encode the password before saving it
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPasswordHash(encodedPassword);
+
+        // Save the user to the database and return AppUserDTO
+        return new AppUserDTO(repository.save(user));
     }
 }

@@ -91,4 +91,8 @@ public class AppUser {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getPassword() {
+        return this.passwordHash;
+    }
 }

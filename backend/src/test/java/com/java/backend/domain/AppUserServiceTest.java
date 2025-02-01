@@ -2,12 +2,14 @@ package com.java.backend.domain;
 
 import com.java.backend.data.AppUserRepository;
 import com.java.backend.model.AppUser;
+import com.java.backend.model.AppUserDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +24,9 @@ class AppUserServiceTest {
     @Mock
     private AppUserRepository repository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;  // Mock the PasswordEncoder
+
     @InjectMocks
     private AppUserService service;
 
@@ -33,16 +38,29 @@ class AppUserServiceTest {
         user.setUserId(1L);
         user.setUsername("testUser");
         user.setEmail("test@example.com");
+        user.setPasswordHash("password123");  // Set a plain password
     }
 
     @Test
     void testAddUser() {
+        // Mock the password encoding with the plain password "password123"
+        when(passwordEncoder.encode(user.getPassword())).thenReturn("encodedPassword123");
+
+        // Mock repository save method
         when(repository.save(user)).thenReturn(user);
-        AppUser result = service.addUser(user);
+
+        // Call the method under test
+        AppUserDTO result = service.registerUser(user);
+
+        // Assert results
         assertNotNull(result);
         assertEquals(user.getUsername(), result.getUsername());
         verify(repository, times(1)).save(user);
+
+        // Verify that password encoding was called with the correct plain password
+        verify(passwordEncoder, times(1)).encode("password123");
     }
+
 
     @Test
     void testDeleteUser() {
@@ -55,7 +73,7 @@ class AppUserServiceTest {
     void testFindAll() {
         List<AppUser> users = Arrays.asList(user);
         when(repository.findAll()).thenReturn(users);
-        List<AppUser> result = service.findAll();
+        List<AppUserDTO> result = service.findAll();
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
         verify(repository, times(1)).findAll();
@@ -64,7 +82,7 @@ class AppUserServiceTest {
     @Test
     void testFindById() {
         when(repository.findById(user.getUserId())).thenReturn(Optional.of(user));
-        AppUser result = service.findById(user.getUserId());
+        AppUserDTO result = service.findById(user.getUserId());
         assertNotNull(result);
         assertEquals(user.getUserId(), result.getUserId());
         verify(repository, times(1)).findById(user.getUserId());
@@ -73,7 +91,7 @@ class AppUserServiceTest {
     @Test
     void testFindById_NotFound() {
         when(repository.findById(2L)).thenReturn(Optional.empty());
-        AppUser result = service.findById(2L);
+        AppUserDTO result = service.findById(2L);
         assertNull(result);
         verify(repository, times(1)).findById(2L);
     }
@@ -81,7 +99,7 @@ class AppUserServiceTest {
     @Test
     void testFindByUsername() {
         when(repository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        AppUser result = service.findByUsername(user.getUsername());
+        AppUserDTO result = service.findByUsername(user.getUsername());
         assertNotNull(result);
         assertEquals(user.getUsername(), result.getUsername());
         verify(repository, times(1)).findByUsername(user.getUsername());
@@ -90,7 +108,7 @@ class AppUserServiceTest {
     @Test
     void testFindByUsername_NotFound() {
         when(repository.findByUsername("unknown")).thenReturn(Optional.empty());
-        AppUser result = service.findByUsername("unknown");
+        AppUserDTO result = service.findByUsername("unknown");
         assertNull(result);
         verify(repository, times(1)).findByUsername("unknown");
     }
@@ -98,7 +116,7 @@ class AppUserServiceTest {
     @Test
     void testFindByEmail() {
         when(repository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        AppUser result = service.findByEmail(user.getEmail());
+        AppUserDTO result = service.findByEmail(user.getEmail());
         assertNotNull(result);
         assertEquals(user.getEmail(), result.getEmail());
         verify(repository, times(1)).findByEmail(user.getEmail());
@@ -107,7 +125,7 @@ class AppUserServiceTest {
     @Test
     void testFindByEmail_NotFound() {
         when(repository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
-        AppUser result = service.findByEmail("unknown@example.com");
+        AppUserDTO result = service.findByEmail("unknown@example.com");
         assertNull(result);
         verify(repository, times(1)).findByEmail("unknown@example.com");
     }

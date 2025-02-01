@@ -2,22 +2,22 @@ DROP DATABASE IF EXISTS WorldbuildingTest;
 CREATE DATABASE WorldbuildingTest;
 USE WorldbuildingTest;
 
-CREATE TABLE user (
-    user_id BIGINT PRIMARY KEY,
-    username VARCHAR(100) UNIQUE NOT NULL,
+CREATE TABLE USER (
+    USER_id BIGINT PRIMARY KEY,
+    USERname VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    role ENUM('admin', 'user') NOT NULL DEFAULT 'user', -- Role defined as ENUM
+    role ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER', -- Role defined as ENUM
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE world (
     world_id BIGINT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
+    USER_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
-    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+    FOREIGN KEY (USER_id) REFERENCES USER(USER_id) ON DELETE CASCADE
 );
 
 CREATE TABLE location (
@@ -89,7 +89,7 @@ BEGIN
     SET FOREIGN_KEY_CHECKS = 0;
 
     -- Truncate all tables
-DELETE FROM user;
+DELETE FROM USER;
 DELETE FROM world;
 DELETE FROM location;
 DELETE FROM species;
@@ -98,7 +98,7 @@ DELETE FROM chara;
 DELETE FROM character_location;
 
 
-ALTER TABLE user AUTO_INCREMENT = 1;
+ALTER TABLE USER AUTO_INCREMENT = 1;
 ALTER TABLE world AUTO_INCREMENT = 1;
 ALTER TABLE location AUTO_INCREMENT = 1;
 ALTER TABLE species AUTO_INCREMENT = 1;
@@ -108,13 +108,13 @@ ALTER TABLE chara AUTO_INCREMENT = 1;
     -- Re-enable foreign key checks
     SET FOREIGN_KEY_CHECKS = 1;
 
-    -- 1. Insert sample users
-    INSERT INTO user (user_id, username, email, password_hash, role, created_at) VALUES
-    (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
-    (2, 'jane_smith', 'jane.smith@example.com', 'hashed_password_456', 'user', NOW());
+    -- 1. Insert sample USERs
+    INSERT INTO USER (USER_id, USERname, email, password_hash, role, created_at) VALUES
+    (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'ADMIN', NOW()),
+    (2, 'jane_smith', 'jane.smith@example.com', 'hashed_password_456', 'USER', NOW());
 
     -- 2. Insert sample worlds
-    INSERT INTO world (world_id, user_id, name, description, created_at) VALUES
+    INSERT INTO world (world_id, USER_id, name, description, created_at) VALUES
     (1, 1, 'Earth', 'A blue planet with diverse ecosystems and climates.', NOW()),
     (2, 2, 'Mars', 'The red planet, home to ancient ruins.', NOW());
 
