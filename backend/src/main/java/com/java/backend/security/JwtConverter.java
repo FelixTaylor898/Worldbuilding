@@ -1,5 +1,6 @@
 package com.java.backend.security;
 
+import com.java.backend.model.AppUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -41,7 +42,7 @@ public class JwtConverter {
 
 
 
-    public String getTokenFromUser(CustomUserDetails user) {
+    public String getTokenFromUser(AppUser user) {
 
         String authorities = user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)

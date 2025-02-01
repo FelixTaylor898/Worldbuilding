@@ -11,6 +11,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Configuration
 @EnableWebSecurity
@@ -26,20 +29,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()  // Disable CSRF for now
                 .authorizeRequests()
-                .requestMatchers("/register", "/login").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/**").permitAll()  // Allow all requests
+                .anyRequest().permitAll()  // Allow any other request
                 .and()
-                .formLogin()
-                .loginPage("/login")
-                .permitAll()
-                .and()
-                .logout()
-                .permitAll();
+                .formLogin().disable()  // Disable form login
+                .httpBasic().disable()  // Disable basic authentication
+                .sessionManagement()
+                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS);  // Disable session creation
 
         return http.build();
     }
 
+
+
+    // AuthenticationManager bean
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
@@ -48,8 +53,11 @@ public class SecurityConfig {
         return authenticationManagerBuilder.build();
     }
 
+    // Password Encoder bean
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }

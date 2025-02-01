@@ -33,7 +33,7 @@ public class AppUserDetailsService implements UserDetailsService {
 
         return User.builder()
                 .username(user.getUsername())
-                .password(user.getPasswordHash())  // Or appUser.getPassword() if not hashed yet
+                .password(user.getPassword())  // Or appUser.getPassword() if not hashed yet
                 .authorities("ROLE_USER")
                 .build();
     }

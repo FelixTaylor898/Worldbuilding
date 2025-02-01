@@ -3,6 +3,7 @@ package com.java.backend.domain;
 import com.java.backend.data.AppUserRepository;
 import com.java.backend.model.AppUser;
 import com.java.backend.model.AppUserDTO;
+import com.java.backend.model.enums.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,33 +28,59 @@ public class AppUserService {
         repository.deleteById(userId);
     }
 
-    public List<AppUserDTO> findAll() {
-        return repository.findAll().stream()
-                .map(AppUserDTO::new) // Convert each AppUser to AppUserDTO
-                .collect(Collectors.toList());
+    public void deleteUser(String username) {
+        repository.deleteByUsername(username);
     }
 
-    public AppUserDTO findById(Long id) {
+
+    public List<AppUser> findAll() {
+        return repository.findAll();
+    }
+
+    public AppUser findById(Long id) {
         Optional<AppUser> op = repository.findById(id);
-        return op.map(AppUserDTO::new).orElse(null); // Return AppUserDTO if found
+        return op.orElse(null); // Return AppUserDTO if found
     }
 
-    public AppUserDTO findByUsername(String username) {
+    public AppUser findByUsername(String username) {
         Optional<AppUser> op = repository.findByUsername(username);
-        return op.map(AppUserDTO::new).orElse(null); // Return AppUserDTO if found
+        return op.orElse(null); // Return AppUserDTO if found
     }
 
-    public AppUserDTO findByEmail(String email) {
+    public AppUser findByEmail(String email) {
         Optional<AppUser> op = repository.findByEmail(email);
-        return op.map(AppUserDTO::new).orElse(null); // Return AppUserDTO if found
+        return op.orElse(null); // Return AppUser if found
     }
 
-    public AppUserDTO registerUser(AppUser user) {
+    public AppUser registerUser(AppUser user) {
         // Encode the password before saving it
         String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPasswordHash(encodedPassword);
+        user.setPassword(encodedPassword);
+        user.setRole(Role.ROLE_USER);
+        return repository.save(user);
+    }
+    public void updateUser(String name, AppUser updatedUser) {
+        AppUser existingUser = findByUsername(name);
+        if (existingUser != null) {
+            existingUser.setEmail(updatedUser.getEmail());
+            existingUser.setPassword(updatedUser.getPassword());
+            repository.save(existingUser);
+        }
+    }
 
-        // Save the user to the database and return AppUserDTO
-        return new AppUserDTO(repository.save(user));
+    public void upgradeToAdmin(String username) {
+        AppUser user = findByUsername(username);
+        if (user != null) {
+            user.setRole(Role.ROLE_ADMIN);
+            repository.save(user);
+        }
+    }
+
+    public boolean existsByUsername(String username) {
+        return findByUsername(username) != null;
+    }
+
+    public boolean existsByEmail(String email) {
+        return findByEmail(email) != null;
     }
 }
