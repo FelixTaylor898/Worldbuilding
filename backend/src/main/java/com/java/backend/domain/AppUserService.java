@@ -5,23 +5,26 @@ import com.java.backend.model.AppUser;
 import com.java.backend.model.AppUserDTO;
 import com.java.backend.model.enums.Role;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class AppUserService {
+public class AppUserService implements UserDetailsService {
 
     private final AppUserRepository repository;
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AppUserService(AppUserRepository repository, PasswordEncoder passwordEncoder) {
+    public AppUserService(AppUserRepository repository) {
         this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public void deleteUser(Long userId) {
@@ -53,9 +56,6 @@ public class AppUserService {
     }
 
     public AppUser registerUser(AppUser user) {
-        // Encode the password before saving it
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
         user.setRole(Role.ROLE_USER);
         return repository.save(user);
     }
@@ -82,5 +82,17 @@ public class AppUserService {
 
     public boolean existsByEmail(String email) {
         return findByEmail(email) != null;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        AppUser user = repository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")) // Adjust roles as needed
+        );
     }
 }

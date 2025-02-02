@@ -11,13 +11,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
@@ -39,33 +38,36 @@ public class AppUserController {
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody AppUser user) {
         if (userService.existsByEmail(user.getEmail())) {
-            return new ResponseEntity<>("Email already in use", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Email already in use");
         }
         if (userService.existsByUsername(user.getUsername())) {
-            return new ResponseEntity<>("Username already in use", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Username already in use");
         }
+
         try {
-            // Register the user
+            // Encode password before saving
+            String pass = user.getPassword();
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             userService.registerUser(user);
 
-            // Authenticate the user manually with the password encoder
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            user.getUsername(),
-                            user.getPassword()  // Make sure this is the plain password, not the hashed one
-                    )
-            );
+            // Manually authenticate since we saved an encoded password
+            UserDetails userDetails = userService.loadUserByUsername(user.getUsername());
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, pass, userDetails.getAuthorities());
 
-            // Set the authentication context
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            authenticationManager.authenticate(authToken); // Authenticate
+            SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            return new ResponseEntity<>("User registered and logged in", HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered and logged in");
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>("Bad credentials: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad credentials: " + e.getMessage());
         } catch (Exception e) {
-            return new ResponseEntity<>("Registration failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Registration failed: " + e.getMessage());
         }
     }
+
+
 
 
 
@@ -73,7 +75,7 @@ public class AppUserController {
     public ResponseEntity<String> loginUser(@RequestBody AppUser user) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), passwordEncoder.encode(user.getPassword()))
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
             String token = converter.getTokenFromUser(new AppUser(authentication.getPrincipal()));
             return ResponseEntity.ok(token);
@@ -152,8 +154,4 @@ public class AppUserController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-
-
 }

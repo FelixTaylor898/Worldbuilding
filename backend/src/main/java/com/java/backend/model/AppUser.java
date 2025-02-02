@@ -51,10 +51,8 @@ public class AppUser implements UserDetails {
     }
 
     public AppUser(Object principal) {
-        if (principal instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) principal;
+        if (principal instanceof UserDetails userDetails) {
             this.username = userDetails.getUsername();
-            // Assuming password is never exposed, you may not set it directly for security reasons
             this.role = Role.valueOf(userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.joining(", ")));
