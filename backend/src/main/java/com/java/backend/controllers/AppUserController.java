@@ -1,9 +1,11 @@
 package com.java.backend.controllers;
 
 import com.java.backend.model.AppUser;
+import com.java.backend.model.AppUserDTO;
 import com.java.backend.model.enums.Role;
 import com.java.backend.security.JwtConverter;
 import com.java.backend.domain.AppUserService;
+import com.java.backend.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,19 +19,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/api/user")
 public class AppUserController {
     private final PasswordEncoder passwordEncoder;
 
+    private final JwtTokenProvider jwtTokenProvider;
     private final AppUserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtConverter converter;
 
     @Autowired
-    public AppUserController(PasswordEncoder passwordEncoder, AppUserService userService, AuthenticationManager authenticationManager, JwtConverter converter) {
+    public AppUserController(PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider, AppUserService userService, AuthenticationManager authenticationManager, JwtConverter converter) {
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.converter = converter;
@@ -60,16 +67,11 @@ public class AppUserController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body("User registered and logged in");
         } catch (BadCredentialsException e) {
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad credentials: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Registration failed: " + e.getMessage());
         }
     }
-
-
-
-
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody AppUser user) {
@@ -78,17 +80,18 @@ public class AppUserController {
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
             String token = converter.getTokenFromUser(new AppUser(authentication.getPrincipal()));
-            return ResponseEntity.ok(token);
+            String token2 = jwtTokenProvider.generateToken(user.getUsername());
+            return ResponseEntity.ok(token2);
         } catch (Exception e) {
             return new ResponseEntity<>("Login failed: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
     @GetMapping("/me")
-    public ResponseEntity<AppUser> getCurrentUser(Principal principal) {
+    public ResponseEntity<AppUserDTO> getCurrentUser(Principal principal) {
         try {
             AppUser user = userService.findByUsername(principal.getName());
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(new AppUserDTO(user));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -132,21 +135,28 @@ public class AppUserController {
     }
 
     @GetMapping()
-    public ResponseEntity<Iterable<AppUser>> getAllUsers() {
+    public ResponseEntity<Iterable<AppUserDTO>> getAllUsers() {
         try {
             Iterable<AppUser> users = userService.findAll();
-            return ResponseEntity.ok(users);
+
+            // Convert AppUser to AppUserDTO
+            List<AppUserDTO> userDTOs = StreamSupport.stream(users.spliterator(), false)
+                    .map(AppUserDTO::new)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(userDTOs);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+
     @GetMapping("/{userId}")
-    public ResponseEntity<AppUser> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<AppUserDTO> getUserById(@PathVariable Long userId) {
         try {
             AppUser user = userService.findById(userId);
             if (user != null) {
-                return ResponseEntity.ok(user);
+                return ResponseEntity.ok(new AppUserDTO(user));
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }

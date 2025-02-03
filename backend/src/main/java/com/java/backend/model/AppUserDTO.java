@@ -22,7 +22,6 @@ public class AppUserDTO {
     public AppUserDTO(AppUser user) {
         this.username = user.getUsername();
         this.userId = user.getUserId();
-        this.email = user.getEmail();
         this.createdAt = user.getCreatedAt();
         this.role = user.getRole();
     }

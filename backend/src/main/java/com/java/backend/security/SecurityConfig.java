@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,17 +28,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()  // Disable CSRF for now
-                .authorizeRequests()
-                .requestMatchers("/**").permitAll()  // Allow all requests
-                .anyRequest().permitAll()  // Allow any other request
-                .and()
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()  // Allow all requests to all endpoints
+                )
                 .formLogin().disable()  // Disable form login
                 .httpBasic().disable()  // Disable basic authentication
                 .sessionManagement()
-                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS);  // Disable session creation
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);  // Disable session creation
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {

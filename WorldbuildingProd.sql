@@ -2,7 +2,7 @@ DROP DATABASE IF EXISTS WorldbuildingProd;
 CREATE DATABASE WorldbuildingProd;
 USE WorldbuildingProd;
 
-CREATE TABLE USER (
+CREATE TABLE user (
     user_id BIGINT PRIMARY KEY auto_increment,
     username VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -12,12 +12,12 @@ CREATE TABLE USER (
 );
 
 CREATE TABLE world (
-    world_id BIGINT PRIMARY KEY,
-    USER_id BIGINT NOT NULL,
+    world_id BIGINT PRIMARY KEY auto_increment,
+    user_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
-    FOREIGN KEY (USER_id) REFERENCES USER(USER_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE location (
