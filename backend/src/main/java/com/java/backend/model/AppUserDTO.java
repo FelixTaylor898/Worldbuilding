@@ -1,10 +1,11 @@
 package com.java.backend.model;
 
 import com.java.backend.model.enums.Role;
+import org.springframework.security.core.userdetails.User;
 
 import java.time.LocalDateTime;
 
-public class AppUserDTO {
+public class AppUserDTO extends AppUser {
     private Long userId;
     private String username;
     private String email;

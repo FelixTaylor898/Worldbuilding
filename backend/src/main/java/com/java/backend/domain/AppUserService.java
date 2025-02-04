@@ -2,28 +2,28 @@ package com.java.backend.domain;
 
 import com.java.backend.data.AppUserRepository;
 import com.java.backend.model.AppUser;
-import com.java.backend.model.AppUserDTO;
 import com.java.backend.model.enums.Role;
+import com.java.backend.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AppUserService implements UserDetailsService {
+    private final JwtTokenProvider jwtTokenProvider;
 
     private final AppUserRepository repository;
 
     @Autowired
-    public AppUserService(AppUserRepository repository) {
+    public AppUserService(JwtTokenProvider jwtTokenProvider, AppUserRepository repository) {
+        this.jwtTokenProvider = jwtTokenProvider;
         this.repository = repository;
     }
 
@@ -94,5 +94,11 @@ public class AppUserService implements UserDetailsService {
                 user.getPassword(),
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")) // Adjust roles as needed
         );
+    }
+
+    public AppUser findUserByHeader(String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String username = jwtTokenProvider.getUsernameFromToken(token);
+        return findByUsername(username);
     }
 }
