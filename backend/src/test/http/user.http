@@ -1,9 +1,17 @@
 @url = http://localhost:8080/api/user
+@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ6b2xhIn0.KeZ3kxbpV08yFl5Aa1NuNwfELUE4-Xl4ahTWrMuS9-E
 
 ####
 GET {{url}} HTTP/1.1
+Authorization: Bearer {{token}}
+
 ###
-GET {{url}}/1 HTTP/1.1
+GET {{url}}/newuser HTTP/1.1
+Authorization: Bearer {{token}}
+
+###
+GET {{url}}/me HTTP/1.1
+Authorization: Bearer {{token}}
 
 ###
 POST {{url}}/register HTTP/1.1
@@ -13,6 +21,17 @@ Content-Type: application/json
     "username": "newuser",
     "password": "securepassword",
     "email": "newuser@example.com"
+}
+
+###
+
+POST {{url}}/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "zola",
+    "password": "muse123",
+    "email": "vampy@example.com"
 }
 
 ###
@@ -27,6 +46,16 @@ Content-Type: application/json
 
 ###
 
-DELETE {{url}}/1 HTTP/1.1
+POST {{url}}/login HTTP/1.1
 Content-Type: application/json
+
+{
+    "username": "zola",
+    "password": "muse123"
+}
+
+###
+
+DELETE {{url}}/newuser HTTP/1.1
+Authorization: Bearer {{token}}
 

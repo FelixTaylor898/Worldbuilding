@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,14 +28,15 @@ public class AppUserService implements UserDetailsService {
         this.repository = repository;
     }
 
+    @Transactional
     public void deleteUser(Long userId) {
         repository.deleteById(userId);
     }
 
+    @Transactional
     public void deleteUser(String username) {
         repository.deleteByUsername(username);
     }
-
 
     public List<AppUser> findAll() {
         return repository.findAll();

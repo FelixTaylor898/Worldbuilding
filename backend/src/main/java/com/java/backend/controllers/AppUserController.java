@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -27,7 +27,6 @@ import java.util.stream.StreamSupport;
 @RequestMapping("/api/user")
 public class AppUserController {
     private final PasswordEncoder passwordEncoder;
-
     private final JwtTokenProvider jwtTokenProvider;
     private final AppUserService userService;
     private final AuthenticationManager authenticationManager;
@@ -55,6 +54,7 @@ public class AppUserController {
             // Encode password before saving
             String pass = user.getPassword();
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setCreatedAt(LocalDateTime.now());
             userService.registerUser(user);
 
             // Manually authenticate since we saved an encoded password
@@ -65,7 +65,8 @@ public class AppUserController {
             authenticationManager.authenticate(authToken); // Authenticate
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered and logged in");
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered");
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad credentials: " + e.getMessage());
         } catch (Exception e) {
@@ -87,43 +88,47 @@ public class AppUserController {
         }
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<AppUserDTO> getCurrentUser(Principal principal) {
-        try {
-            AppUser user = userService.findByUsername(principal.getName());
-            return ResponseEntity.ok(new AppUserDTO(user));
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
     @PutMapping("/update")
-    public ResponseEntity<String> updateUser(@RequestBody AppUser updatedUser, Principal principal) {
+    public ResponseEntity<String> updateUser(@RequestBody AppUser updatedUser,
+                                             @RequestHeader("Authorization") String authHeader) {
         try {
-            if (!principal.getName().equals(updatedUser.getUsername())) {
+            AppUser authenticatedUser = userService.findUserByHeader(authHeader);
+            // Check if the authenticated user is an admin or updating their own profile
+            boolean isAdmin = authenticatedUser.getRole().equals(Role.ROLE_ADMIN);
+            boolean isSelfUpdate = authenticatedUser.getUsername().equals(updatedUser.getUsername());
+            if (!isAdmin && !isSelfUpdate) {
                 return new ResponseEntity<>("You can only update your own profile", HttpStatus.FORBIDDEN);
             }
-            userService.updateUser(principal.getName(), updatedUser);
+            // Preserve the original role if the updater is not an admin
+            if (!isAdmin) {
+                updatedUser.setRole(authenticatedUser.getRole());
+            }
+            userService.updateUser(updatedUser.getUsername(), updatedUser);
             return ResponseEntity.ok("User updated successfully");
         } catch (Exception e) {
             return new ResponseEntity<>("Update failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser(Principal principal) {
+    @DeleteMapping("/{username}")
+    public ResponseEntity<String> deleteUser(@RequestHeader("Authorization") String authHeader, @PathVariable String username) {
         try {
-            userService.deleteUser(principal.getName());
-            return ResponseEntity.ok("User deleted successfully");
+            AppUser authenticatedUser = userService.findUserByHeader(authHeader);
+            if (authenticatedUser.getRole() == Role.ROLE_ADMIN || authenticatedUser.getUsername().equals(username)) {
+                userService.deleteUser(username);
+                return ResponseEntity.ok("User deleted successfully");
+            } else {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
         } catch (Exception e) {
             return new ResponseEntity<>("Deletion failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping("/upgrade/{username}")
-    public ResponseEntity<String> upgradeToAdmin(@PathVariable String username, Principal principal) {
+    public ResponseEntity<String> upgradeToAdmin(@PathVariable String username, @RequestHeader("Authorization") String authHeader) {
         try {
-            AppUser requestingUser = userService.findByUsername(principal.getName());
+            AppUser requestingUser = userService.findUserByHeader(authHeader);
             if (requestingUser == null || !requestingUser.getRole().equals(Role.ROLE_ADMIN)) {
                 return new ResponseEntity<>("You must be an admin to perform this action", HttpStatus.FORBIDDEN);
             }
@@ -135,28 +140,41 @@ public class AppUserController {
     }
 
     @GetMapping()
-    public ResponseEntity<Iterable<AppUserDTO>> getAllUsers() {
+    public ResponseEntity<Iterable<AppUser>> getAllUsers(@RequestHeader("Authorization") String authHeader) {
         try {
+            AppUser user = userService.findUserByHeader(authHeader);
+            if (user.getRole() != Role.ROLE_ADMIN) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
             Iterable<AppUser> users = userService.findAll();
 
-            // Convert AppUser to AppUserDTO
-            List<AppUserDTO> userDTOs = StreamSupport.stream(users.spliterator(), false)
-                    .map(AppUserDTO::new)
-                    .collect(Collectors.toList());
 
-            return ResponseEntity.ok(userDTOs);
+            return ResponseEntity.ok(users);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<AppUserDTO> getUserById(@PathVariable Long userId) {
+    @GetMapping("/{username}")
+    public ResponseEntity<AppUser> getByUsername(@RequestHeader("Authorization") String authHeader, @PathVariable String username) {
         try {
-            AppUser user = userService.findById(userId);
+            AppUser user = userService.findUserByHeader(authHeader);
+            if (user.getRole() != Role.ROLE_ADMIN) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+            AppUser returnedUser = userService.findByUsername(username);
+            return ResponseEntity.ok(returnedUser);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<AppUser> getMe(@RequestHeader("Authorization") String authHeader) {
+        try {
+            AppUser user = userService.findUserByHeader(authHeader);
             if (user != null) {
-                return ResponseEntity.ok(new AppUserDTO(user));
+                return ResponseEntity.ok(user);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }

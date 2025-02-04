@@ -3,16 +3,12 @@ package com.java.backend.controllers;
 import com.java.backend.domain.AppUserService;
 import com.java.backend.domain.WorldService;
 import com.java.backend.model.AppUser;
-import com.java.backend.model.AppUserDTO;
 import com.java.backend.model.World;
-import com.java.backend.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -54,8 +50,6 @@ public class WorldController {
         return world.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-
-
 
     @PostMapping
     public ResponseEntity<World> addWorld(@RequestBody World world, @RequestHeader("Authorization") String authHeader) {

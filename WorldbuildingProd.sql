@@ -79,5 +79,3 @@ CREATE TABLE character_location (
 	FOREIGN KEY (character_id) REFERENCES chara(character_id) ON DELETE CASCADE,
     FOREIGN KEY (location_id) REFERENCES location(location_id) ON DELETE CASCADE
 );
-
-select * from user;

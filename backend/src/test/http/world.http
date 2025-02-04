@@ -1,5 +1,5 @@
 @url = http://localhost:8080/api/world
-@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZXd1c2VyIn0.AsC-nbuvp9txQf-96g00DVV_rpUOKiYnt-CMFeoiOlU
+@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ6b2xhIn0.KeZ3kxbpV08yFl5Aa1NuNwfELUE4-Xl4ahTWrMuS9-E
 
 ####
 GET {{url}} HTTP/1.1
