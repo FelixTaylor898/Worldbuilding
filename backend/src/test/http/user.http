@@ -59,3 +59,19 @@ Content-Type: application/json
 DELETE {{url}}/newuser HTTP/1.1
 Authorization: Bearer {{token}}
 
+###
+
+PUT {{url}}/3 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "username": "newuser1",
+    "password": "",
+    "email": ""
+}
+
+###
+
+PUT {{url}}/upgrade/newuser1 HTTP/1.1
+Authorization: Bearer {{token}}

@@ -1,7 +1,6 @@
 package com.java.backend.controllers;
 
 import com.java.backend.model.AppUser;
-import com.java.backend.model.AppUserDTO;
 import com.java.backend.model.enums.Role;
 import com.java.backend.security.JwtConverter;
 import com.java.backend.domain.AppUserService;
@@ -88,22 +87,21 @@ public class AppUserController {
         }
     }
 
-    @PutMapping("/update")
+    @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@RequestBody AppUser updatedUser,
-                                             @RequestHeader("Authorization") String authHeader) {
+                                             @RequestHeader("Authorization") String authHeader,
+                                             @PathVariable Long id) {
         try {
             AppUser authenticatedUser = userService.findUserByHeader(authHeader);
-            // Check if the authenticated user is an admin or updating their own profile
             boolean isAdmin = authenticatedUser.getRole().equals(Role.ROLE_ADMIN);
             boolean isSelfUpdate = authenticatedUser.getUsername().equals(updatedUser.getUsername());
             if (!isAdmin && !isSelfUpdate) {
                 return new ResponseEntity<>("You can only update your own profile", HttpStatus.FORBIDDEN);
             }
-            // Preserve the original role if the updater is not an admin
             if (!isAdmin) {
                 updatedUser.setRole(authenticatedUser.getRole());
             }
-            userService.updateUser(updatedUser.getUsername(), updatedUser);
+            userService.updateUser(id, updatedUser);
             return ResponseEntity.ok("User updated successfully");
         } catch (Exception e) {
             return new ResponseEntity<>("Update failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);

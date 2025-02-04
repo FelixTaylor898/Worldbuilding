@@ -61,11 +61,12 @@ public class AppUserService implements UserDetailsService {
         user.setRole(Role.ROLE_USER);
         return repository.save(user);
     }
-    public void updateUser(String name, AppUser updatedUser) {
-        AppUser existingUser = findByUsername(name);
+    public void updateUser(Long id, AppUser updatedUser) {
+        AppUser existingUser = findById(id);
         if (existingUser != null) {
-            existingUser.setEmail(updatedUser.getEmail());
-            existingUser.setPassword(updatedUser.getPassword());
+            if (!updatedUser.getUsername().isEmpty()) existingUser.setUsername(updatedUser.getUsername());
+            if (!updatedUser.getEmail().isEmpty()) existingUser.setEmail(updatedUser.getEmail());
+            if (!updatedUser.getPassword().isEmpty()) existingUser.setPassword(updatedUser.getPassword());
             repository.save(existingUser);
         }
     }
