@@ -6,7 +6,7 @@ GET {{url}} HTTP/1.1
 Authorization: Bearer {{token}}
 
 ###
-GET {{url}}/1 HTTP/1.1'
+GET {{url}}/3 HTTP/1.1'
 Authorization: Bearer {{token}}
 
 
@@ -16,6 +16,17 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "name": "My Fantasy World",
+    "name": "Ibinor",
     "description": "A land of magic and adventure."
+}
+
+###
+
+POST {{url}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Hachi Vampires",
+    "description": ""
 }

@@ -25,6 +25,22 @@ public class WorldController {
         this.userService = userService;
     }
 
+    @DeleteMapping("/{worldId}")
+    public ResponseEntity<String> deleteWorld(@RequestHeader("Authorization") String authHeader, @PathVariable Long worldId) {
+        try {
+            World world = worldService.findById(worldId);
+            AppUser authenticatedUser = userService.findUserByHeader(authHeader);
+            if (authenticatedUser.getUsername().equals(world.getUser().getUsername())) {
+                worldService.deleteWorld(worldId);
+                return ResponseEntity.ok("World deleted successfully");
+            } else {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Deletion failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping
     public ResponseEntity<Iterable<World>> getAllWorlds(@RequestHeader("Authorization") String authHeader) {
         AppUser user = userService.findUserByHeader(authHeader);
@@ -32,7 +48,6 @@ public class WorldController {
             Iterable<World> worlds = worldService.findByUser(user);
             return ResponseEntity.ok(worlds);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -41,8 +56,6 @@ public class WorldController {
     public ResponseEntity<World> getWorldById(@RequestHeader("Authorization") String authHeader,
                                               @PathVariable Long worldId) {
         Iterable<World> worlds = getAllWorlds(authHeader).getBody();
-
-        // Find the world that matches the given worldId
         Optional<World> world = StreamSupport.stream(worlds.spliterator(), false)
                 .filter(w -> w.getWorldId().equals(worldId))
                 .findFirst();
@@ -58,16 +71,27 @@ public class WorldController {
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-
-            // Set the user in the world object
-            world.setUser(user);
-
-            // Save the world
             World savedWorld = worldService.addWorld(world);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedWorld);
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateWorld(@RequestBody World world,
+                                             @RequestHeader("Authorization") String authHeader,
+                                             @PathVariable Long id) {
+        try {
+            World oldWorld = worldService.findById(id);
+            AppUser authenticatedUser = userService.findUserByHeader(authHeader);
+            if (authenticatedUser.getUsername().equals(oldWorld.getUser().getUsername())) {
+                return new ResponseEntity<>("You can only update your own world", HttpStatus.FORBIDDEN);
+            }
+            worldService.updateWorld(id, world);
+            return ResponseEntity.ok("User updated successfully");
+        } catch (Exception e) {
+            return new ResponseEntity<>("Update failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

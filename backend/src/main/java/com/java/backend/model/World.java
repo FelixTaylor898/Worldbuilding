@@ -23,7 +23,7 @@ public class World {
     private String description;
 
     @Column(name = "created_at", updatable = false)
-    private final LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // Getters and Setters
     public Long getWorldId() {
@@ -60,5 +60,9 @@ public class World {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

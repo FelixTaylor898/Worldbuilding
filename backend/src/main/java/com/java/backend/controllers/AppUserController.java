@@ -98,9 +98,7 @@ public class AppUserController {
             if (!isAdmin && !isSelfUpdate) {
                 return new ResponseEntity<>("You can only update your own profile", HttpStatus.FORBIDDEN);
             }
-            if (!isAdmin) {
-                updatedUser.setRole(authenticatedUser.getRole());
-            }
+            updatedUser.setRole(authenticatedUser.getRole());
             userService.updateUser(id, updatedUser);
             return ResponseEntity.ok("User updated successfully");
         } catch (Exception e) {

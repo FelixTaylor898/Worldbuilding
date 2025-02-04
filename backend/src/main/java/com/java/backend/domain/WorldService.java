@@ -6,6 +6,7 @@ import com.java.backend.model.World;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class WorldService {
     }
 
     public World addWorld(World world) {
+        world.setCreatedAt(LocalDateTime.now());
         return repository.save(world);
     }
 
@@ -28,8 +30,8 @@ public class WorldService {
         Optional<World> op = repository.findById(worldId);
         if (op.isPresent()) {
             World existingWorld = op.get();
-            existingWorld.setDescription(updatedWorld.getDescription());
-            existingWorld.setName(updatedWorld.getName());
+            if (!updatedWorld.getDescription().isEmpty()) existingWorld.setDescription(updatedWorld.getDescription());
+            if (!updatedWorld.getName().isEmpty()) existingWorld.setName(updatedWorld.getName());
             return repository.save(existingWorld);
         }
         return null;
