@@ -34,7 +34,7 @@ public class WorldController {
                 worldService.deleteWorld(worldId);
                 return ResponseEntity.ok("World deleted successfully");
             } else {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("You can only delete your own world",HttpStatus.FORBIDDEN);
             }
         } catch (Exception e) {
             return new ResponseEntity<>("Deletion failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);

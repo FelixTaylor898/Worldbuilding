@@ -7,7 +7,7 @@ CREATE TABLE user (
     username VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role ENUM('ROLE_ADMIN', 'ROLE_USER') DEFAULT 'ROLE_USER', -- Role defined as ENUM
+    role ENUM('ROLE_ADMIN', 'ROLE_USER') NOT NULL DEFAULT 'ROLE_USER', -- Role defined as ENUM
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

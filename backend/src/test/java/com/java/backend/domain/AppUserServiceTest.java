@@ -2,7 +2,6 @@ package com.java.backend.domain;
 
 import com.java.backend.data.AppUserRepository;
 import com.java.backend.model.AppUser;
-import com.java.backend.model.AppUserDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

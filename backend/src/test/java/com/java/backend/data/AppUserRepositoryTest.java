@@ -43,7 +43,6 @@ public class AppUserRepositoryTest {
         Optional<AppUser> op = appUserRepository.findById(1L);
         assertTrue(op.isPresent());
         AppUser user = op.get();
-        //     (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
         assertEquals("john_doe", user.getUsername());
         assertEquals("john.doe@example.com", user.getEmail());
         assertEquals(Role.ROLE_ADMIN, user.getRole());
@@ -84,7 +83,6 @@ public class AppUserRepositoryTest {
         Optional<AppUser> op = appUserRepository.findByUsername("john_doe");
         assertTrue(op.isPresent());
         AppUser user = op.get();
-        //     (1, 'john_doe', 'john.doe@example.com', 'hashed_password_123', 'admin', NOW()),
         assertEquals("john_doe", user.getUsername());
         assertEquals("john.doe@example.com", user.getEmail());
         assertEquals(Role.ROLE_ADMIN, user.getRole());

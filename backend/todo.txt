@@ -1,1 +1,0 @@
-remake the usercontroller so you can only get your own info, unless you're an admin
