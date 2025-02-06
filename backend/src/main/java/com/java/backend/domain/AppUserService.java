@@ -64,9 +64,20 @@ public class AppUserService implements UserDetailsService {
     public void updateUser(Long id, AppUser updatedUser) {
         AppUser existingUser = findById(id);
         if (existingUser != null) {
+            // Check if the new username or email already exists
+            if (existsByUsername(updatedUser.getUsername()) && !updatedUser.getUsername().equals(existingUser.getUsername())) {
+                throw new IllegalArgumentException("Username already exists");
+            }
+            if (existsByEmail(updatedUser.getEmail()) && !updatedUser.getEmail().equals(existingUser.getEmail())) {
+                throw new IllegalArgumentException("Email already exists");
+            }
+
+            // Update the user fields if they are not empty
             if (!updatedUser.getUsername().isEmpty()) existingUser.setUsername(updatedUser.getUsername());
             if (!updatedUser.getEmail().isEmpty()) existingUser.setEmail(updatedUser.getEmail());
             if (!updatedUser.getPassword().isEmpty()) existingUser.setPassword(updatedUser.getPassword());
+
+            // Save the updated user
             repository.save(existingUser);
         }
     }

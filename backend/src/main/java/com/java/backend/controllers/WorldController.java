@@ -71,6 +71,7 @@ public class WorldController {
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
+            world.setUser(user);
             World savedWorld = worldService.addWorld(world);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedWorld);
         } catch (Exception e) {
@@ -85,11 +86,11 @@ public class WorldController {
         try {
             World oldWorld = worldService.findById(id);
             AppUser authenticatedUser = userService.findUserByHeader(authHeader);
-            if (authenticatedUser.getUsername().equals(oldWorld.getUser().getUsername())) {
+            if (!authenticatedUser.getUsername().equals(oldWorld.getUser().getUsername())) {
                 return new ResponseEntity<>("You can only update your own world", HttpStatus.FORBIDDEN);
             }
             worldService.updateWorld(id, world);
-            return ResponseEntity.ok("User updated successfully");
+            return ResponseEntity.ok("World updated successfully");
         } catch (Exception e) {
             return new ResponseEntity<>("Update failed: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }

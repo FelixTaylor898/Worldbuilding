@@ -1,12 +1,13 @@
 @url = http://localhost:8080/api/world
-@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ6b2xhIn0.KeZ3kxbpV08yFl5Aa1NuNwfELUE4-Xl4ahTWrMuS9-E
+@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZXd1c2VyMSJ9.J7rCts7MgowJdnnu1Z2daS2YarXjltlL9XcBwUn5uOo
+
 
 ####
 GET {{url}} HTTP/1.1
 Authorization: Bearer {{token}}
 
 ###
-GET {{url}}/3 HTTP/1.1'
+GET {{url}}/5 HTTP/1.1
 Authorization: Bearer {{token}}
 
 
@@ -30,3 +31,19 @@ Authorization: Bearer {{token}}
     "name": "Hachi Vampires",
     "description": ""
 }
+
+###
+
+PUT {{url}}/3 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Hachi Vampires",
+    "description": "A world of vampires and witches"
+}
+
+###
+
+DELETE {{url}}/5 HTTP/1.1
+Authorization: Bearer {{token}}
