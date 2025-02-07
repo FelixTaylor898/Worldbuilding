@@ -80,6 +80,14 @@ CREATE TABLE character_location (
     FOREIGN KEY (location_id) REFERENCES location(location_id) ON DELETE CASCADE
 );
 
+CREATE TABLE location_hierarchy (
+    child_location_id BIGINT NOT NULL,
+    parent_location_id BIGINT NOT NULL,
+    PRIMARY KEY (child_location_id, parent_location_id),
+    FOREIGN KEY (child_location_id) REFERENCES location(location_id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_location_id) REFERENCES location(location_id) ON DELETE CASCADE
+);
+
 DELIMITER $$
 
 CREATE PROCEDURE reset_database()
@@ -119,10 +127,10 @@ ALTER TABLE chara AUTO_INCREMENT = 1;
     (2, 2, 'Mars', 'The red planet, home to ancient ruins.', CURRENT_TIMESTAMP);
 
     -- 3. Insert sample locations
-    INSERT INTO location (location_id, world_id, name, type, description, created_at, parent_id, misc) VALUES
-    (1, 1, 'New York City', 'Urban', 'A bustling city on Earth.', CURRENT_TIMESTAMP, NULL, 'Famous for skyscrapers'),
-    (2, 1, 'Amazon Rainforest', 'Natural', 'A vast tropical rainforest.', CURRENT_TIMESTAMP, NULL, 'Home to diverse wildlife'),
-    (3, 2, 'Valles Marineris', 'Canyon', 'A massive canyon on Mars.', CURRENT_TIMESTAMP, NULL, 'One of the largest in the solar system');
+    INSERT INTO location (location_id, world_id, name, type, description, created_at, misc) VALUES
+    (1, 1, 'New York City', 'Urban', 'A bustling city on Earth.', CURRENT_TIMESTAMP, 'Famous for skyscrapers'),
+    (2, 1, 'Amazon Rainforest', 'Natural', 'A vast tropical rainforest.', CURRENT_TIMESTAMP, 'Home to diverse wildlife'),
+    (3, 2, 'Valles Marineris', 'Canyon', 'A massive canyon on Mars.', CURRENT_TIMESTAMP, 'One of the largest in the solar system');
 
     -- 4. Insert sample species
     INSERT INTO species (species_id, world_id, name, description, is_subspecies, created_at, misc) VALUES

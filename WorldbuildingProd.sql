@@ -26,7 +26,7 @@ CREATE TABLE location (
     name VARCHAR(255) NOT NULL,
     type VARCHAR(50),
     description TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     misc TEXT,
     FOREIGN KEY (world_id) REFERENCES world(world_id) ON DELETE CASCADE
 );
@@ -78,4 +78,12 @@ CREATE TABLE character_location (
     PRIMARY KEY (character_id, location_id),
 	FOREIGN KEY (character_id) REFERENCES chara(character_id) ON DELETE CASCADE,
     FOREIGN KEY (location_id) REFERENCES location(location_id) ON DELETE CASCADE
+);
+
+CREATE TABLE location_hierarchy (
+    child_location_id BIGINT NOT NULL,
+    parent_location_id BIGINT NOT NULL,
+    PRIMARY KEY (child_location_id, parent_location_id),
+    FOREIGN KEY (child_location_id) REFERENCES location(location_id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_location_id) REFERENCES location(location_id) ON DELETE CASCADE
 );

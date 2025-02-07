@@ -2,6 +2,7 @@ package com.java.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "location")
@@ -31,9 +32,17 @@ public class Location {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private Location parent;
+    @OneToMany(mappedBy = "parentLocation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Location> childLocations;
+
+    // Getter and Setter for childLocations
+    public List<Location> getChildLocations() {
+        return childLocations;
+    }
+
+    public void setChildLocations(List<Location> childLocations) {
+        this.childLocations = childLocations;
+    }
 
     // Getters and Setters
     public Long getLocationId() {
@@ -78,14 +87,6 @@ public class Location {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public Location getParent() {
-        return parent;
-    }
-
-    public void setParent(Location parent) {
-        this.parent = parent;
     }
 
     public String getMisc() {
