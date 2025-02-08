@@ -21,7 +21,7 @@ CREATE TABLE world (
 );
 
 CREATE TABLE location (
-    location_id BIGINT PRIMARY KEY,
+    location_id BIGINT PRIMARY KEY auto_increment,
     world_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     type VARCHAR(50),

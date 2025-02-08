@@ -8,6 +8,10 @@ import java.util.List;
 @Table(name = "location")
 public class Location {
 
+    public Location() {
+    }
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "location_id")
@@ -32,8 +36,19 @@ public class Location {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @ManyToOne
+    @JoinColumn(name = "parent_location_id")
+    private Location parentLocation;
+
     @OneToMany(mappedBy = "parentLocation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Location> childLocations;
+
+    public Location(String name, String type, String s) {
+        this.name = name;
+        this.type = type;
+        this.description = s;
+        this.createdAt = LocalDateTime.now();
+    }
 
     // Getter and Setter for childLocations
     public List<Location> getChildLocations() {

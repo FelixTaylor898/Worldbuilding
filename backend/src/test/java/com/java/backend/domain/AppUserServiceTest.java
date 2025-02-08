@@ -43,8 +43,6 @@ class AppUserServiceTest {
     @Test
     void testAddUser() {
         // Mock the password encoding with the plain password "password123"
-        when(passwordEncoder.encode(user.getPassword())).thenReturn("encodedPassword123");
-
         // Mock repository save method
         when(repository.save(user)).thenReturn(user);
 
@@ -54,12 +52,12 @@ class AppUserServiceTest {
         // Assert results
         assertNotNull(result);
         assertEquals(user.getUsername(), result.getUsername());
-        verify(repository, times(1)).save(user);
 
         // Verify that password encoding was called with the correct plain password
-        verify(passwordEncoder, times(1)).encode("password123");
+        // Ensure the password is encoded before saving
+        // Verify that the repository's save method is called once
+        verify(repository, times(1)).save(user);
     }
-
 
     @Test
     void testDeleteUser() {

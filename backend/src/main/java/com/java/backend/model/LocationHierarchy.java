@@ -2,23 +2,38 @@ package com.java.backend.model;
 
 import jakarta.persistence.*;
 
-
 @Entity
+@Table(name = "location_hierarchy")
+@IdClass(LocationHierarchyId.class) // Composite key
 public class LocationHierarchy {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    // Do not annotate these fields with @Id
     @ManyToOne
-    @JoinColumn(name = "child_location_id", referencedColumnName = "locationId")
-    private Location childLocation;
-
-    @ManyToOne
-    @JoinColumn(name = "parent_location_id", referencedColumnName = "locationId")
+    @JoinColumn(name = "parent_location_id", insertable = false, updatable = false)
     private Location parentLocation;
 
+    @ManyToOne
+    @JoinColumn(name = "child_location_id", insertable = false, updatable = false)
+    private Location childLocation;
+
+    // Use @Id for the fields matching the composite key
+    @Id
+    @Column(name = "parent_location_id", insertable = false, updatable = false)
+    private Long parentLocationId;
+
+    @Id
+    @Column(name = "child_location_id", insertable = false, updatable = false)
+    private Long childLocationId;
+
     // Getters and Setters
+    public Location getParentLocation() {
+        return parentLocation;
+    }
+
+    public void setParentLocation(Location parentLocation) {
+        this.parentLocation = parentLocation;
+    }
+
     public Location getChildLocation() {
         return childLocation;
     }
@@ -27,11 +42,19 @@ public class LocationHierarchy {
         this.childLocation = childLocation;
     }
 
-    public Location getParentLocation() {
-        return parentLocation;
+    public Long getParentLocationId() {
+        return parentLocationId;
     }
 
-    public void setParentLocation(Location parentLocation) {
-        this.parentLocation = parentLocation;
+    public void setParentLocationId(Long parentLocationId) {
+        this.parentLocationId = parentLocationId;
+    }
+
+    public Long getChildLocationId() {
+        return childLocationId;
+    }
+
+    public void setChildLocationId(Long childLocationId) {
+        this.childLocationId = childLocationId;
     }
 }

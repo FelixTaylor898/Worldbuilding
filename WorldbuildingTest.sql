@@ -21,7 +21,7 @@ CREATE TABLE world (
 );
 
 CREATE TABLE location (
-    location_id BIGINT PRIMARY KEY,
+    location_id BIGINT PRIMARY KEY auto_increment,
     world_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     type VARCHAR(50),
@@ -104,6 +104,7 @@ DELETE FROM species;
 DELETE FROM species_parent;
 DELETE FROM chara;
 DELETE FROM character_location;
+DELETE from location_hierarchy;
 
 
 ALTER TABLE USER AUTO_INCREMENT = 1;
@@ -122,7 +123,7 @@ ALTER TABLE chara AUTO_INCREMENT = 1;
     (2, 'jane_smith', 'jane.smith@example.com', 'hashed_password_456', 'ROLE_USER', CURRENT_TIMESTAMP);
 
     -- 2. Insert sample worlds
-    INSERT INTO world (world_id, USER_id, name, description, created_at) VALUES
+    INSERT INTO world (world_id, user_id, name, description, created_at) VALUES
     (1, 1, 'Earth', 'A blue planet with diverse ecosystems and climates.', CURRENT_TIMESTAMP),
     (2, 2, 'Mars', 'The red planet, home to ancient ruins.', CURRENT_TIMESTAMP);
 
@@ -141,6 +142,12 @@ ALTER TABLE chara AUTO_INCREMENT = 1;
     -- 5. Insert relationships between species and their parent species
     INSERT INTO species_parent (species_id, parent_species_id) VALUES
     (2, 1);  -- Elves are a subspecies of Humans
+    
+        -- 8. Insert location hierarchy relationships
+    -- New York City is a child of Earth
+    INSERT INTO location_hierarchy (child_location_id, parent_location_id) VALUES
+    (1, 2),
+    (3, 2); 
 
     -- 6. Insert sample characters (chara)
     INSERT INTO chara (character_id, world_id, name, description, species_id, gender_identity, orientation, birthdate, deathdate, appearance, personality, aliases, occupation, age, created_at, misc) VALUES
