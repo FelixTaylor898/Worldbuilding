@@ -111,4 +111,8 @@ public class Location {
     public void setMisc(String misc) {
         this.misc = misc;
     }
+
+    public void setCreatedAt(LocalDateTime now) {
+        this.createdAt = now;
+    }
 }
